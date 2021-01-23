@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+import sqlite3
 
 import pytest
 
@@ -72,3 +73,15 @@ class TestFilebox:
         new_abs_file_name = os.path.join(tmp, NEW_FILENAME)
         box.get(os.path.basename(a_file), new_abs_file_name)
         assert a_sha256 == sha256(new_abs_file_name)
+
+    def test_double_put(self, tmp, a_filebox, a_file):
+        """
+        a file can't be saved twice into the filebox
+        there's no need to save it twoce since the database has session scope
+        and one record is already there
+        """
+        box = filebox.filebox(a_filebox)
+        with pytest.raises(sqlite3.IntegrityError):
+            # eww, an eight years old bug
+            # https://bugs.python.org/issue16379
+            box.put(a_file, os.path.basename(a_file))
