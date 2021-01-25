@@ -81,7 +81,7 @@ class TestFilebox:
         and one record is already there
         """
         box = filebox.filebox(a_filebox)
-        with pytest.raises(sqlite3.IntegrityError):
+        with pytest.raises(sqlite3.IntegrityError, match="UNIQUE constraint failed"):
             # eww, an eight years old bug
             # https://bugs.python.org/issue16379
             box.put(a_file, os.path.basename(a_file))
