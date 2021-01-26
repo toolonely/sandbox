@@ -23,22 +23,12 @@ class FileBox:
         self.conn = sqlite3.connect(name)
         self.cursor = self.conn.cursor()
         query = (
-            "SELECT "
-            "COUNT(name) "
-            "FROM sqlite_master "
-            "WHERE type='table' AND name='{}'".format(FILES_TABLE)
-        )
+            "CREATE TABLE IF NOT EXISTS {} "
+            "(id INTEGER PRIMARY KEY, "
+            " name VARCHAR UNIQUE, "
+            " data BLOB)"
+        ).format(FILES_TABLE)
         self.cursor.execute(query)
-        row = self.cursor.fetchone()
-        count = row[0]
-        if count == 0:
-            query = (
-                "CREATE TABLE {} "
-                "(id INTEGER PRIMARY KEY, "
-                " name VARCHAR UNIQUE, "
-                " data BLOB)"
-            ).format(FILES_TABLE)
-            self.cursor.execute(query)
         self.conn.commit()
 
     def put(self, fs_filename, filename):
