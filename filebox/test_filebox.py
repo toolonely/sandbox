@@ -10,7 +10,6 @@ import filebox
 
 
 FILEBOX = "filebox"
-DBNAME = "{}.sqlite".format(FILEBOX)
 FILENAME = "file"
 TEXT = "foo"
 NEW_FILENAME = "new{}".format(FILENAME)
@@ -20,13 +19,6 @@ NEW_FILENAME = "new{}".format(FILENAME)
 def tmp(tmpdir_factory):
     """generate a tempdir name"""
     return tmpdir_factory.mktemp(FILEBOX)
-
-@pytest.fixture()
-def a_filebox(tmp):
-    abs_file_name = os.path.join(tmp, DBNAME)
-    if os.path.isfile(abs_file_name):
-        os.unlink(abs_file_name)
-    return abs_file_name
 
 
 @pytest.fixture(scope="session")
@@ -67,20 +59,20 @@ def a_sha256(a_file):
 
 
 class TestFilebox:
-    def test_get_and_put(self, tmp, a_filebox, a_file, a_sha256):
-        box = filebox.filebox(a_filebox)
+    def test_get_and_put(self, tmp, a_file, a_sha256):
+        box = filebox.filebox(":memory:")
         box.put(a_file, os.path.basename(a_file))
         new_abs_file_name = os.path.join(tmp, NEW_FILENAME)
         box.get(os.path.basename(a_file), new_abs_file_name)
         assert a_sha256 == sha256(new_abs_file_name)
 
-    def test_double_put(self, tmp, a_filebox, a_file):
+    def test_double_put(self, tmp, a_file):
         """
         a file can't be saved twice into the filebox
         there's no need to save it twoce since the database has session scope
         and one record is already there
         """
-        box = filebox.filebox(a_filebox)
+        box = filebox.filebox(":memory:")
         box.put(a_file, os.path.basename(a_file))
         with pytest.raises(sqlite3.IntegrityError, match="UNIQUE constraint failed"):
             # eww, an eight years old bug
