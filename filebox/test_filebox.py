@@ -21,7 +21,7 @@ def tmp(tmpdir_factory):
     """generate a tempdir name"""
     return tmpdir_factory.mktemp(FILEBOX)
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def a_filebox(tmp):
     abs_file_name = os.path.join(tmp, DBNAME)
     if os.path.isfile(abs_file_name):
@@ -81,6 +81,7 @@ class TestFilebox:
         and one record is already there
         """
         box = filebox.filebox(a_filebox)
+        box.put(a_file, os.path.basename(a_file))
         with pytest.raises(sqlite3.IntegrityError, match="UNIQUE constraint failed"):
             # eww, an eight years old bug
             # https://bugs.python.org/issue16379
